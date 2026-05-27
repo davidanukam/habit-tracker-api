@@ -2,7 +2,10 @@ from fastapi import APIRouter, HTTPException
 from models.habit_model import HabitCreate
 from models.completion_model import CompletionCreate
 
+import requests
+
 import routers.user_router
+import routers.completion_router
 
 from datetime import datetime
 
@@ -47,6 +50,19 @@ def create_habit(new_habit: HabitCreate):
     new_habit.habit_id = new_habit_id
 
     habits.append(new_habit)
+
+    new_completion = CompletionCreate()
+
+    new_completion_id = (
+        1
+        if not len(routers.completion_router.completions)
+        else routers.completion_router.completions[-1].completion_id + 1
+    )
+    new_completion.completion_id = new_completion_id
+
+    new_completion.habit_id = new_habit_id
+
+    routers.completion_router.completions.append(new_completion)
 
     return new_habit
 
@@ -93,6 +109,9 @@ def delete_habit(habit_id: int):
     for habit in habits:
         if habit.habit_id == habit_id:
             habits.remove(habit)
+            for completion in routers.completion_router.completions:
+                if completion.habit_id == habit_id:
+                    routers.completion_router.completions.remove(completion)
             return habit
 
     raise HTTPException(status_code=404, detail=f"No habit with id {habit_id} exists")

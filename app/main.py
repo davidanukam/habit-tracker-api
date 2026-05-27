@@ -3,7 +3,7 @@ from fastapi import Request
 import logging
 import time
 
-from routers import habit_router, user_router
+from routers import habit_router, user_router, completion_router
 
 app = FastAPI()
 app.title = "Habit Tracker API"
@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 # Routers
 app.include_router(user_router.router)
 app.include_router(habit_router.router)
+app.include_router(completion_router.router)
 
 
 @app.middleware("http")
