@@ -2,12 +2,12 @@ from fastapi import APIRouter, HTTPException
 from models.habit_model import HabitCreate
 from models.completion_model import CompletionCreate
 
-import requests
+from datetime import date, timedelta
 
 import routers.user_router
 import routers.completion_router
 
-from datetime import datetime
+import utils.refresh_completions
 
 router = APIRouter(prefix="/habits", tags=["habits"])
 
@@ -79,28 +79,57 @@ def mark_habit(habit_id: int):
 
     for habit in habits:
         if habit.habit_id == habit_id:
-            new_completion = CompletionCreate()
+            # Check if a completion was already made today for this habit
+            todays_date = date.today()
 
+            curr_habit_completions: list[CompletionCreate] = []
+            for completion in routers.completion_router.completions:
+                if completion.habit_id == habit_id:
+                    curr_habit_completions.append(completion)
+
+            if curr_habit_completions:
+                for completion in curr_habit_completions:
+                    if completion.date_completed == todays_date:
+                        raise HTTPException(
+                            status_code=409,
+                            detail="This habit was already completed today",
+                        )
+
+            # Create a new Completion record
+            new_completion = CompletionCreate()
             new_completion_id = (
                 1
                 if not len(routers.completion_router.completions)
                 else routers.completion_router.completions[-1].completion_id + 1
             )
             new_completion.completion_id = new_completion_id
-
             new_completion.habit_id = habit_id
+            new_completion.date_completed = todays_date
 
-            routers.completion_router.completions.append(new_completion)
+            utils.refresh_completions.refresh_completed_today_status()
 
-            # TODO: Add completed_today logic (updating other records to false)
             new_completion.completed_today = True
 
-            # TODO: Add streak logic (using date_completed)
-            habit.streak += 1
+            if curr_habit_completions:
+                yesterday_date = todays_date - timedelta(days=1)
 
-            now = datetime.now()
-            new_completion.date_completed = f"{str(now.day).rjust(2, "0")}/{str(now.month).rjust(2, "0")}/{now.year}"
+                r_sorted_completions = list(
+                    sorted(
+                        curr_habit_completions,
+                        key=lambda c: c.completion_id,
+                        reverse=True,
+                    )
+                )
 
+                if r_sorted_completions[0].completed_today == False:
+                    if r_sorted_completions[0].date_completed == yesterday_date:
+                        habit.streak += 1
+                    else:
+                        habit.streak = 0
+            else:
+                habit.streak += 1
+
+            routers.completion_router.completions.append(new_completion)
             return habit
 
     raise HTTPException(status_code=404, detail=f"No habit with id {habit_id} exists")

@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from models.completion_model import CompletionCreate
 
-# import routers.habit_router
+import utils.refresh_completions
 
 router = APIRouter(prefix="/completions", tags=["completions"])
 
@@ -12,6 +12,7 @@ completions: list[CompletionCreate] = []
 def get_all_completions():
     """Return all currently made completions"""
 
+    utils.refresh_completions.refresh_completed_today_status()
     return completions
 
 
@@ -19,6 +20,7 @@ def get_all_completions():
 def get_completion(completion_id: int):
     """Return a specific completion"""
 
+    utils.refresh_completions.refresh_completed_today_status()
     for completion in completions:
         if completion.completion_id == completion_id:
             return completion
@@ -26,22 +28,3 @@ def get_completion(completion_id: int):
     raise HTTPException(
         status_code=404, detail=f"No completion with id {completion_id} exists"
     )
-
-
-# @router.post("/{habit_id}")
-# def create_completion(habit_id: int):
-#     if habit_id not in [habit.habit_id for habit in routers.habit_router.habits]:
-#         raise HTTPException(
-#             status_code=404, detail=f"No habit with id {habit_id} exists"
-#         )
-
-#     new_completion = CompletionCreate()
-
-#     new_completion_id = 1 if not len(completions) else completions[-1].completion_id + 1
-#     new_completion.completion_id = new_completion_id
-
-#     new_completion.habit_id = habit_id
-
-#     completions.append(new_completion)
-
-#     return new_completion
