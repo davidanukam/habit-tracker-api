@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException
-from models.completion_model import CompletionCreate
+from schemas.schemas import CompletionCreate
 
 import utils.refresh_completions
 

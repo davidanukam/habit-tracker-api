@@ -1,12 +1,12 @@
 from fastapi import APIRouter, HTTPException
-from models.user_model import UserCreate, UserUpdate
-from models.habit_model import HabitCreate
+from schemas.schemas import UserCreate, UserUpdate, HabitCreate
 
 import routers.habit_router
 
 router = APIRouter(prefix="/users", tags=["users"])
 
 users: list[UserCreate] = []
+
 
 @router.get("/")
 def get_all_users():

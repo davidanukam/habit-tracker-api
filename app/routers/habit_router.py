@@ -1,6 +1,5 @@
 from fastapi import APIRouter, HTTPException
-from models.habit_model import HabitCreate
-from models.completion_model import CompletionCreate
+from schemas.schemas import HabitCreate, CompletionCreate
 
 from datetime import date, timedelta
 
