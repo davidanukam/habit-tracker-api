@@ -51,19 +51,6 @@ def create_habit(new_habit: HabitCreate):
 
     habits.append(new_habit)
 
-    new_completion = CompletionCreate()
-
-    new_completion_id = (
-        1
-        if not len(routers.completion_router.completions)
-        else routers.completion_router.completions[-1].completion_id + 1
-    )
-    new_completion.completion_id = new_completion_id
-
-    new_completion.habit_id = new_habit_id
-
-    routers.completion_router.completions.append(new_completion)
-
     return new_habit
 
 
@@ -92,11 +79,28 @@ def mark_habit(habit_id: int):
 
     for habit in habits:
         if habit.habit_id == habit_id:
-            completion = CompletionCreate()
-            completion.completed_today = True
-            completion.streak += 1
+            new_completion = CompletionCreate()
+
+            new_completion_id = (
+                1
+                if not len(routers.completion_router.completions)
+                else routers.completion_router.completions[-1].completion_id + 1
+            )
+            new_completion.completion_id = new_completion_id
+
+            new_completion.habit_id = habit_id
+
+            routers.completion_router.completions.append(new_completion)
+
+            # TODO: Add completed_today logic (updating other records to false)
+            new_completion.completed_today = True
+
+            # TODO: Add streak logic (using date_completed)
+            habit.streak += 1
+
             now = datetime.now()
-            completion.dates_completed.append(f"{now.day}/{now.month}/{now.year}")
+            new_completion.date_completed = f"{str(now.day).rjust(2, "0")}/{str(now.month).rjust(2, "0")}/{now.year}"
+
             return habit
 
     raise HTTPException(status_code=404, detail=f"No habit with id {habit_id} exists")

@@ -5,5 +5,4 @@ class CompletionCreate(BaseModel):
     completion_id: int = 0
     habit_id: int = 0
     completed_today: bool = False
-    dates_completed: list[str] = []
-    streak: int = 0
+    date_completed: str = "00/00/0000"
