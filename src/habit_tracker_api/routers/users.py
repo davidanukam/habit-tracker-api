@@ -1,19 +1,20 @@
 from fastapi import APIRouter, HTTPException, status
+from ..schemas.schemas import UserCreate, UserUpdate, UserResponse
 
 router = APIRouter()
 
-users: list[dict] = []
+users: list[UserResponse] = []
 
 
-@router.get("/users")
+@router.get("/users", response_model=list[UserResponse])
 def get_users():
     return users
 
 
-@router.get("/users/{id}")
+@router.get("/users/{id}", response_model=UserResponse)
 def get_user(id: int):
     for user in users:
-        if user["id"] == id:
+        if user.user_id == id:
             return user
 
     raise HTTPException(
@@ -21,37 +22,42 @@ def get_user(id: int):
     )
 
 
-@router.post("/users")
-def create_user(username: str, password: str, email: str):
-    id = max([users[i]["id"] for i in range(len(users))]) + 1 if len(users) else 1
-    new_user = {"id": id, "username": username, "password": password, "email": email}
-    users.append(new_user)
-    return new_user
+@router.post("/users", response_model=UserResponse)
+def create_user(new_user: UserCreate):
+    id = max([users[i].user_id for i in range(len(users))]) + 1 if len(users) else 1
 
-
-@router.put("/users/{id}")
-def update_user(
-    id: int,
-    username: str | None = None,
-    password: str | None = None,
-    email: str | None = None,
-):
-    for user in users:
-        if user["id"] == id:
-            user["username"] = username if username else user["username"]
-            user["password"] = password if password else user["password"]
-            user["email"] = email if email else user["email"]
-            return user
-
-    raise HTTPException(
-        status_code=status.HTTP_404_NOT_FOUND, detail=f"User with id {id} not found"
+    new_user_response = UserResponse(
+        user_id=id,
+        username=new_user.username,
+        password=new_user.password,
+        email=new_user.email,
     )
 
+    users.append(new_user_response)
 
-@router.delete("/users/{id}")
+    return new_user_response
+
+
+@router.put("/users/{id}", response_model=UserResponse)
+def update_user(id: int, updated_user: UserUpdate):
+    user = next((u for u in users if u.user_id == id), None)
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=f"User with id {id} not found"
+        )
+
+    update_data = updated_user.model_dump(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(user, key, value)
+
+    return user
+
+
+@router.delete("/users/{id}", response_model=UserResponse)
 def delete_user(id: int):
     for user in users:
-        if user["id"] == id:
+        if user.user_id == id:
             users.remove(user)
             return user
 
