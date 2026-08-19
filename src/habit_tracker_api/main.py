@@ -12,11 +12,11 @@ from .database.database import Base, engine
 Base.metadata.create_all(bind=engine)
 
 
-# @app.get("/", tags=["Main"])
-# def main():
-#     return {
-#         "Habit Tracker API": "An API to track all of my daily habits",
-#     }
+@app.get("/", tags=["Main"])
+def main():
+    return {
+        "Habit Tracker API": "An API to track all of my daily habits",
+    }
 
 
 app.include_router(user_router.router)
