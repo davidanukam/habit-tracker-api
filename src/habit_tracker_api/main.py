@@ -1,4 +1,6 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
 from .routers import user_router
 
 app = FastAPI(
@@ -7,13 +9,25 @@ app = FastAPI(
     version="0.1.0",
 )
 
+
+# For development: allow all origins. Lock this down later.
+origins = ["*", "http://localhost:3000"]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 from .database.database import Base, engine
 
 Base.metadata.create_all(bind=engine)
 
 
-@app.get("/", tags=["Main"])
-def main():
+@app.get("/", tags=["Root"])
+def root():
     return {
         "Habit Tracker API": "An API to track all of my daily habits",
     }
