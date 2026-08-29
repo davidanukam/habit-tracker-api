@@ -3,9 +3,7 @@ name = "habit-tracker-api"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
-authors = [
-    { name = "davidanukam", email = "davidanukam72@gmail.com" }
-]
+authors = [{ name = "davidanukam", email = "davidanukam72@gmail.com" }]
 requires-python = ">=3.12"
 dependencies = [
     "fastapi[standard]>=0.141.1",
@@ -15,11 +13,20 @@ dependencies = [
 ]
 
 [project.scripts]
-habit-tracker-api = "habit_tracker_api:main"
+dev = "start_dev:main"
+habit-tracker-api = "main:main"
+gui = "frontend.run_gui:main"
 
 [tool.fastapi]
-entrypoint = "src.habit_tracker_api.main:app"
+entrypoint = "backend.api:app"
+
+# Tell setuptools (default builder) to find modules directly under src/
+[tool.setuptools.packages.find]
+where = ["src"]
 
 [build-system]
-requires = ["uv_build>=0.12.5,<0.13.0"]
-build-backend = "uv_build"
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[dependency-groups]
+dev = ["honcho>=2.0.0"]

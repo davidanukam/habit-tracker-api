@@ -1,7 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from .routers import user_router, habit_router
+from backend.routers import habit_router
+from backend.routers import user_router
 
 app = FastAPI(
     title="Habit Tracker API",
