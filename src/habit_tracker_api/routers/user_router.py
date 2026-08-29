@@ -51,12 +51,12 @@ def create_user(user_create: UserCreate, db: Session = Depends(get_db)):
 
         # call refresh because I need Python to fetch the latest, updated state of an object directly from the database
         db.refresh(new_user)
-
         return new_user
+
     except IntegrityError:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="A user with this email or username already exists.",
+            detail="A user with this email or username already exists",
         )
 
 

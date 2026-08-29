@@ -11,3 +11,15 @@ class User(Base):
     username: Mapped[str] = mapped_column(unique=True, nullable=False)
     password: Mapped[str] = mapped_column(nullable=False)
     email: Mapped[str] = mapped_column(unique=True, index=True, nullable=False)
+
+
+class Habit(Base):
+    __tablename__ = "habits"
+
+    habit_id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(nullable=False)
+    name: Mapped[str] = mapped_column(nullable=False)
+    des: Mapped[str] = mapped_column(nullable=False)
+    status: Mapped[str] = mapped_column(nullable=False)
+    started_at: Mapped[str] = mapped_column(nullable=False)
+    completed_at: Mapped[str] = mapped_column(nullable=True)
